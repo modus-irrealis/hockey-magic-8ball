@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+    <head><title>Hockey Magic 8-Ball</title>
+    <style type="text/css">
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+        }
+		
+		#configure_toggle {
+			cursor: pointer;
+		}
+		
+		.fandom, .prompt, .character {
+			padding: 2px 5px;
+		}
+		
+		.fandom {
+			background: lightblue;
+		}
+		
+		.prompt {
+			background: salmon;
+		}
+		
+		.character {
+			background: antiquewhite;
+		}
+		
+		/*.alert {
+			display: none;
+		}*/
+		
+		small {
+			font-size: 0.9em;
+		}
+    </style>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+	<script type="text/javascript">
+		//<![CDATA[ <!--
+		
+		jQuery(document).ready( function($) {
+            var players;
+            
+            $.getJSON( "default/hockey/NHL201617Skaters.json", function( data ) { var skaters = data.data;
+					  console.log('fetched skaters');
+					  $.getJSON("default/hockey/NHL201617Goalies.json", function(data) {
+						console.log('fetched goalies');
+						var goalies = data.data;
+											
+						players = $.extend([], skaters, goalies);
+						//console.log(players);
+
+						createRandomPrompt();
+					  });
+			} );
+            
+            if ( localStorage.player_filters ) {
+				console.log('using player filters');
+
+                var player_filters = JSON.parse( localStorage.player_filters );
+                if ( player_filters.gp ) {
+                    $('#gp_filter').val( player_filters.gp );
+                }
+                if ( player_filters.team ) {
+                    $('#team_filter').val( player_filters.team );
+                }
+            }
+
+			var prompts;
+			
+			load_prompts();
+			
+			if	( !prompts ) {
+				if ( localStorage.prompts ) {
+					prompts = JSON.parse( localStorage.prompts );
+					update_prompts_field();
+				} else {
+					console.log('fetching default prompts');
+					$.getJSON( "default/prompts.json", function( data ) { prompts = data; update_prompts_field(); createRandomPrompt(); } );
+				}
+			}
+			
+			createRandomPrompt();
+			
+			$('#save').click( function(e) {
+				e.preventDefault();
+			
+				if ( !load_prompts() ) return;
+				
+                localStorage.setItem( 'player_filters', JSON.stringify(
+                    { 'gp': $('#gp_filter').val(),
+                      'team': $('#team_filter').val() } ) );
+				localStorage.setItem( 'prompts', JSON.stringify( prompts ) );
+				createRandomPrompt();
+			});
+			
+			$('#clear').click( function() {
+				localStorage.clear();
+			});
+			
+			$('#add_new_prompt').click( function(e) { 
+				e.preventDefault();
+				if ( !load_prompts() ) return;
+				prompts.push( $('#new_prompt').val() );
+				$('#new_prompt').val('');
+				update_prompts_field();
+				createRandomPrompt();
+			} );
+			
+			$('#another').click ( function( e ) {
+				createRandomPrompt();
+			});
+			
+			$('#configure').hide();
+			
+			$('#configure_toggle').click( function() {
+				$('#configure').slideToggle();
+			});
+
+			
+			function load_prompts() {
+				if ( $.trim($('#prompts').val()).length > 0 ) {
+					try {
+						prompts = JSON.parse( $('#prompts').val() );
+						return true;
+					}
+					catch ( err ) {
+						$('.alert').append( '<li>Prompts: ' + err + '<\/li>' ).show();
+						return false;
+					}
+				}
+			}
+			
+			function createRandomPrompt() {
+                
+                var filtered_players = players;
+                
+				if ( !load_prompts() ) return;
+			
+				if ( !players || !prompts ) {
+					return;
+				}
+                
+                if ( localStorage.player_filters) {
+                    player_filters = JSON.parse(localStorage.player_filters);
+                    filtered_players = $.grep( players, function(n) {
+                        var output = false;
+                        if ( player_filters.gp > 1 ) {
+                            output = n.gamesPlayed >= player_filters.gp;
+                        }
+						else {
+							output = true;
+						}
+                        if ( player_filters.team.length > 0 ) {
+                            output = player_filters.team.indexOf( n.playerTeamsPlayedFor ) > -1;
+                        }
+                        return output;
+                    });
+                }
+                if ( filtered_players.length === 0) {
+                    $('.alert').append('<li>No players found for this filter</li>');
+                    return;
+                }
+				
+				$('.alert').empty();
+				var random_prompt = prompts[ getRandomInt( 0, prompts.length ) ];
+				var random_character1 = filtered_players[ getRandomInt( 0, filtered_players.length ) ];
+                var random_character2;
+                do {
+                    random_character2 = filtered_players[getRandomInt( 0, filtered_players.length )];
+                } while( random_character2 === random_character1 );
+				$('#prompt').html( '<span class="prompt">' + random_prompt + '<\/span> with <span class="character">' + random_character1.playerName + ' ('+ random_character1.playerTeamsPlayedFor + ')<\/span> and <span class="character">' + random_character2.playerName + ' (' + random_character2.playerTeamsPlayedFor + ')<\/span>'				);
+				
+			}
+			
+			function update_prompts_field() {
+				$('#prompts').val( JSON.stringify( prompts, false, 1 ) );
+			}
+			
+			
+		});
+		
+		// Returns a random integer between min (included) and max (excluded)
+		// Using Math.round() will give you a non-uniform distribution!
+		function getRandomInt(min, max) {
+		  return Math.floor(Math.random() * (max - min)) + min;
+		}
+		// --> ]]>
+	</script>
+	</head>
+    <body>
+        <h1>Hockey Fandom 8-Ball</h1>
+        <noscript>This page requires Javascript to operate. Sorry.</noscript>
+        <p>What you should write: <span id="prompt"></span></p>
+		<p><button id="another">Another!</button></p>
+		<ul class="alert"></ul>
+		<h2 id="configure_toggle">Configure &#9881;</h2>
+        <p>Click "save" at the bottom to apply filters.</p>
+		<div id="configure">
+            <h3>Players</h3>
+            <p>Player data is for 2016-17 and manually fetched from NHL.com. Last fetched: 2017-08-16.</p>
+            <p><label>Games Played >= <input type="text" id="gp_filter" value="1" /> (in this current season)</label></p>
+            <p><label>Team(s) <select id="team_filter" multiple="multiple" style="height: 6em; vertical-align: text-top;">
+            <option value="">(All)</option>
+            <optgroup label="Metropolitan">
+                <option value="CAR">Carolina Hurricanes</option>
+                <option value="CBJ">Columbus Blue Jackets</option>
+                <option value="NJD">New Jersey Devils</option>
+                <option value="NYI">New York Islanders</option>
+                <option value="NYR">New York Rangers</option>
+                <option value="PHI">Philadelphia Flyers</option>
+                <option value="PIT">Pittsburgh Penguins</option>
+                <option value="WSH">Washington Capitals</option>
+            </optgroup>
+			<optgroup label="Atlantic">
+				<option value="CBJ">Boston Bruins</option>
+                <option value="BUF">Buffalo Sabres</option>
+                <option value="DET">Detroit Red Wings</option>
+                <option value="FLA">Florida Panthers</option>
+                <option value="MTL">Montréal Canadiens</option>
+                <option value="OTT">Ottawa Senators</option>
+                <option value="TBL">Tampa Bay Lightning</option>
+                <option value="TOR">Toronto Maple Leafs</option>
+			</optgroup>
+			<optgroup label="Central">
+				<option value="CHI">Chicago Blackhawks</option>
+                <option value="COL">Colorado Avalanche</option>
+                <option value="DAL">Dallas Stars</option>
+                <option value="MIN">Minnesota Wild</option>
+                <option value="NSH">Nashville Predators</option>
+                <option value="STL">St. Louis Blues</option>
+                <option value="WPG">Winnipeg Jets</option>
+			</optgroup>
+			<optgroup label="Pacific">
+				<option value="ANA">Anaheim Ducks</option>
+                <option value="ARI">Arizona Coyotes</option>
+                <option value="CGY">Calgary Flames</option>
+                <option value="EDM">Edmonton Oilers</option>
+                <option value="LAK">Los Angeles Kings</option>
+                <option value="SJS">San Jose Sharks</option>
+                <option value="VAN">Vancouver Canucks</option>
+			</optgroup>
+            </select></p>
+
+		<p><label><h3>Prompts</h3>
+        <p>Default prompts are from <a href="http://trope-bingo.dreamwidth.org">Trope Bingo</a>.</p>
+		<p><textarea id="prompts" cols=50 rows=5></textarea></label></p>
+		<p><label>Add New prompt: <input type="text" id="new_prompt" /></label> <button id="add_new_prompt">Add New</button></p>
+		
+		<p><button id="save">Save</button> <button id="clear" type="reset">Clear Local Data</button> <br />
+		<small>"Save" adds to your local browser storage so that the 8-ball will remember your filters and prompts. "Clear" clears it.</small></p>
+		</div>
+    </body>
+</html>
