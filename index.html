@@ -47,7 +47,7 @@
 						console.log('fetched goalies');
 						var goalies = data.data;
 											
-						players = $.extend([], skaters, goalies);
+						players = skaters.concat(goalies);
 						//console.log(players);
 
 						createRandomPrompt();
