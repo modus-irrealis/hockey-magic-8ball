@@ -76,7 +76,7 @@
 					update_prompts_field();
 				} else {
 					console.log('fetching default prompts');
-					$.getJSON( "default/prompts.json", function( data ) { prompts = data; update_prompts_field(); createRandomPrompt(); } );
+					$.getJSON( "data/prompts.json", function( data ) { prompts = data; update_prompts_field(); createRandomPrompt(); } );
 				}
 			}
 			
