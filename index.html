@@ -41,9 +41,9 @@
 		jQuery(document).ready( function($) {
             var players;
             
-            $.getJSON( "default/hockey/NHL201617Skaters.json", function( data ) { var skaters = data.data;
+            $.getJSON( "data/NHL201617Skaters.json", function( data ) { var skaters = data.data;
 					  console.log('fetched skaters');
-					  $.getJSON("default/hockey/NHL201617Goalies.json", function(data) {
+					  $.getJSON("data/NHL201617Goalies.json", function(data) {
 						console.log('fetched goalies');
 						var goalies = data.data;
 											
