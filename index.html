@@ -144,17 +144,17 @@
                 if ( localStorage.player_filters) {
                     player_filters = JSON.parse(localStorage.player_filters);
                     filtered_players = $.grep( players, function(n) {
-                        var output = false;
+                        var include = false;
                         if ( player_filters.gp > 1 ) {
-                            output = n.gamesPlayed >= player_filters.gp;
+                            include = n.gamesPlayed >= player_filters.gp;
                         }
-						else {
-							output = true;
-						}
-                        if ( player_filters.team.length > 0 ) {
-                            output = player_filters.team.indexOf( n.playerTeamsPlayedFor ) > -1;
+			else {
+			    include = true;
+			}
+                        if ( include && player_filters.team.length > 0 ) {
+                            include = player_filters.team.indexOf( n.playerTeamsPlayedFor ) > -1;
                         }
-                        return output;
+                        return include;
                     });
                 }
                 if ( filtered_players.length === 0) {
