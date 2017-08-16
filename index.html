@@ -152,7 +152,10 @@
 			    include = true;
 			}
                         if ( include && player_filters.team.length > 0 ) {
-                            include = player_filters.team.indexOf( n.playerTeamsPlayedFor ) > -1;
+			    var teamsPlayedFor = n.playerTeamsPlayedFor.split(", ");
+			    for (var i = 0; i < teamsPlayedFor.length; i++) {
+                                include = player_filters.team.indexOf( teamsPlayedFor[i] ) > -1;
+			    }
                         }
                         return include;
                     });
