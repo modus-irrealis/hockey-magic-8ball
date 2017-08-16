@@ -157,8 +157,8 @@
                         return include;
                     });
                 }
-                if ( filtered_players.length === 0) {
-                    $('.alert').append('<li>No players found for this filter</li>');
+                if ( filtered_players.length <= 1) {
+                    $('.alert').append('<li>Not enough players found for this filter</li>');
                     return;
                 }
 				
