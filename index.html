@@ -185,6 +185,15 @@
 				$('#prompts').val( JSON.stringify( prompts, false, 1 ) );
 			}
 			
+					
+		$('#selectAllTeams').click( function(e) {
+		  $("#team_filter option:selected").prop("selected", true);
+		});
+		
+		$('#selectNoTeams').click( function(e) {
+		  $("#team_filter option:selected").prop("selected", false);
+		});
+		
 			
 		});
 		
@@ -196,15 +205,6 @@
 		  max = Math.floor(max);
 		  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 		}
-		
-		$('#selectAllTeams').click( function() {
-		  $("#team_filter option:selected").prop("selected", true);
-		});
-		
-		$('#selectNoTeams').click( function() {
-		  $("#team_filter option:selected").prop("selected", false);
-		});
-		
 		// --> ]]>
 	</script>
 	</head>
