@@ -33,6 +33,11 @@
 		small {
 			font-size: 0.9em;
 		}
+	    
+	    .js-interactive {
+		    cursor: pointer;
+		    text-decoration: underline;
+	    }
     </style>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 	<script type="text/javascript">
@@ -207,7 +212,6 @@
             <p>Player data is for 2016-17 and manually fetched from NHL.com. Last fetched: 2017-08-16.</p>
             <p><label>Games Played >= <input type="text" id="gp_filter" value="1" /> (in this current season)</label></p>
             <p><label>Team(s) <select id="team_filter" multiple="multiple" style="height: 6em; vertical-align: text-top;">
-            <option value="">(All)</option>
             <optgroup label="Metropolitan">
                 <option value="CAR">Carolina Hurricanes</option>
                 <option value="CBJ">Columbus Blue Jackets</option>
@@ -246,7 +250,9 @@
                 <option value="SJS">San Jose Sharks</option>
                 <option value="VAN">Vancouver Canucks</option>
 			</optgroup>
-            </select></p>
+            </select><br />
+		    <span onclick="jQuery("#team_filter option:selected").prop("selected", true);" class="js-interactive" id="selectAllTeams">Select All</a> | 
+		    <span onclick="jQuery("#team_filter option:selected").prop("selected", false);" class="js-interactive" id="selectNoTeams">Select None</a></p>
 
 		<p><label><h3>Prompts</h3>
         <p>Default prompts are from <a href="http://trope-bingo.dreamwidth.org">Trope Bingo</a>.</p>
